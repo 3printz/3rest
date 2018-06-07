@@ -26,17 +26,6 @@ type Trans struct {
 	Type          string
 }
 
-type Promize struct {
-	Bank           string
-	Id             gocql.UUID
-	Amount         string
-	Blob           string
-	OriginZaddress string
-	OriginBank     string
-	OriginAccount  string
-	Timestamp      int64
-}
-
 type User struct {
 	Zaddress  string
 	Bank      string
@@ -185,66 +174,6 @@ func isDoubleSpend(from string, cid string) bool {
 	return false
 }
 
-func createPromize(promize *Promize) error {
-	q := `
-        INSERT INTO promizes (
-            bank,
-            id,
-            amount,
-            blob,
-            origin_zaddress,
-			origin_bank,
-			origin_account,
-			timestamp
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `
-	err := Session.Query(q,
-		promize.Bank,
-		promize.Id,
-		promize.Amount,
-		promize.Blob,
-		promize.OriginZaddress,
-		promize.OriginBank,
-		promize.OriginAccount,
-		promize.Timestamp).Exec()
-
-	if err != nil {
-		println(err.Error())
-	}
-
-	return err
-}
-
-func getPromize(bank string, id string) (*Promize, error) {
-	uuid, err := gocql.ParseUUID(id)
-	if err != nil {
-		println(err.Error)
-		return nil, err
-	}
-
-	m := map[string]interface{}{}
-	q := `
-        SELECT bank, id, amount, blob
-        FROM promizes
-            WHERE bank = ?
-            AND id = ?
-        LIMIT 1
-    `
-	itr := Session.Query(q, bank, uuid).Consistency(gocql.One).Iter()
-	for itr.MapScan(m) {
-		promize := &Promize{}
-		promize.Bank = m["bank"].(string)
-		promize.Id = m["id"].(gocql.UUID)
-		promize.Amount = m["amount"].(string)
-		promize.Blob = m["blob"].(string)
-
-		return promize, nil
-	}
-
-	return nil, errors.New("Not found promize")
-}
-
 func createUser(user *User) error {
 	q := `
         INSERT INTO users (
@@ -301,36 +230,6 @@ func getUser(zaddress string) (*User, error) {
 	}
 
 	return nil, errors.New("Not found promize")
-}
-
-func setUserSalt(salt string, zaddress string) error {
-	q := `
-		UPDATE users 
-			SET salt = ? 
-        WHERE zaddress = ?
-        `
-	err := Session.Query(q, salt, zaddress).Exec()
-	if err != nil {
-		println(err.Error())
-		return err
-	}
-
-	return nil
-}
-
-func setUserAccount(account string, zaddress string) error {
-	q := `
-		UPDATE users 
-			SET account = ? 
-        WHERE zaddress = ?
-        `
-	err := Session.Query(q, account, zaddress).Exec()
-	if err != nil {
-		println(err.Error())
-		return err
-	}
-
-	return nil
 }
 
 func setUserVerified(verified bool, zaddress string) error {
