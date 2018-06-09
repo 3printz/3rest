@@ -31,6 +31,9 @@ func main() {
 	// init cassandra session
 	initCStarSession()
 
+	// start kafka consumer
+	go initConsumer()
+
 	// router
 	r := mux.NewRouter()
 	r.HandleFunc("/transactions", transactions).Methods("POST")

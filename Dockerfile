@@ -5,6 +5,8 @@ MAINTAINER Eranga Bandara (erangaeb@gmail.com)
 # install dependencies
 RUN go get github.com/gocql/gocql
 RUN	go get github.com/gorilla/mux
+RUN go get github.com/Shopify/sarama
+RUN go get github.com/wvanbergen/kafka/consumergroup
 
 # env
 ENV SWITCH_NAME senzswitch

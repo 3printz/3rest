@@ -22,6 +22,13 @@ type CassandraConfig struct {
 	consistancy string
 }
 
+type KafkaConfig struct {
+	topic  string
+	cgroup string
+	zhost  string
+	zport  string
+}
+
 var config = Config{
 	switchName: getEnv("SWITCH_NAME", "senzswitch"),
 	switchHost: getEnv("SWITCH_HOST", "www.rahasak.com"),
@@ -38,6 +45,13 @@ var cassandraConfig = CassandraConfig{
 	port:        getEnv("CASSANDRA_PORT", "9042"),
 	keyspace:    getEnv("CASSANDRA_KEYSPACE", "zchain"),
 	consistancy: getEnv("CASSANDRA_CONSISTANCY", "ALL"),
+}
+
+var kafkaConfig = KafkaConfig{
+	topic:  getEnv("KAFKA_TOPIC", "sampath"),
+	cgroup: getEnv("KAFKA_CGROUP", "sampathg"),
+	zhost:  getEnv("KAFKA_ZHOST", "dev.localhost"),
+	zport:  getEnv("KAFKA_ZPORT", "2181"),
 }
 
 func getEnv(key, fallback string) string {
