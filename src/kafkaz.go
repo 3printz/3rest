@@ -9,20 +9,20 @@ import (
 	"time"
 )
 
+// channel to publish kafka messages
+var kchan = make(chan Kmsg, 10)
+
 func initKafkaz() {
 	//setup sarama log to stdout
 	sarama.Logger = log.New(os.Stdout, "", log.Ltime)
 
-	// channel to publish kafka messages
-	kchan := make(chan Kmsg)
-
 	// consuner
 	cg := initConzumer()
-	go conzume(cg, kchan)
+	go conzume(cg)
 
 	// producer
 	pr := initProduzer()
-	go produze(pr, kchan)
+	go produze(pr)
 }
 
 func initConzumer() *consumergroup.ConsumerGroup {
@@ -53,14 +53,14 @@ func initProduzer() sarama.SyncProducer {
 	kafkaConn := kafkaConfig.khost + ":" + kafkaConfig.kport
 	pr, err := sarama.NewSyncProducer([]string{kafkaConn}, config)
 	if err != nil {
-		fmt.Println("Error consumer group: ", err.Error())
+		fmt.Println("Error producer: ", err.Error())
 		os.Exit(1)
 	}
 
 	return pr
 }
 
-func conzume(cg *consumergroup.ConsumerGroup, kchan chan Kmsg) {
+func conzume(cg *consumergroup.ConsumerGroup) {
 	for {
 		select {
 		case msg := <-cg.Messages():
@@ -69,9 +69,7 @@ func conzume(cg *consumergroup.ConsumerGroup, kchan chan Kmsg) {
 			if msg.Topic != kafkaConfig.topic {
 				continue
 			}
-
-			fmt.Println("Topic: ", msg.Topic)
-			fmt.Println("Value: ", string(msg.Value))
+			fmt.Println("Received topic, msg: ", msg.Topic, msg.Value)
 
 			// commit to zookeeper that message is read
 			// this prevent read message multiple times after restart
@@ -85,7 +83,7 @@ func conzume(cg *consumergroup.ConsumerGroup, kchan chan Kmsg) {
 	}
 }
 
-func produze(pr sarama.SyncProducer, kchan chan Kmsg) {
+func produze(pr sarama.SyncProducer) {
 	for {
 		select {
 		case kmsg := <-kchan:
