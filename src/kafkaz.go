@@ -33,7 +33,10 @@ func initConzumer() *consumergroup.ConsumerGroup {
 
 	// join to consumer group
 	zookeeperConn := kafkaConfig.zhost + ":" + kafkaConfig.zport
-	cg, err := consumergroup.JoinConsumerGroup(kafkaConfig.cgroup, []string{kafkaConfig.topic}, []string{zookeeperConn}, config)
+	cg, err := consumergroup.JoinConsumerGroup(kafkaConfig.cgroup,
+		[]string{kafkaConfig.topic},
+		[]string{zookeeperConn},
+		config)
 	if err != nil {
 		fmt.Println("Error consumer group: ", err.Error())
 		os.Exit(1)
