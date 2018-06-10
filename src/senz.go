@@ -10,9 +10,14 @@ type Senz struct {
 	Digsig   string
 }
 
-type SenzMsg struct {
+type Zmsg struct {
 	Uid string
 	Msg string
+}
+
+type Kmsg struct {
+	Topic string
+	Msg   string
 }
 
 func main() {

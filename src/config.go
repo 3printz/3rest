@@ -25,6 +25,8 @@ type CassandraConfig struct {
 type KafkaConfig struct {
 	topic  string
 	cgroup string
+	khost  string
+	kport  string
 	zhost  string
 	zport  string
 }
@@ -50,6 +52,8 @@ var cassandraConfig = CassandraConfig{
 var kafkaConfig = KafkaConfig{
 	topic:  getEnv("KAFKA_TOPIC", "sampath"),
 	cgroup: getEnv("KAFKA_CGROUP", "sampathg"),
+	khost:  getEnv("KAFKA_KHOST", "dev.localhost"),
+	kport:  getEnv("KAFKA_KPORT", "9092"),
 	zhost:  getEnv("KAFKA_ZHOST", "dev.localhost"),
 	zport:  getEnv("KAFKA_ZPORT", "2181"),
 }

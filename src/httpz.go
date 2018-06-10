@@ -30,9 +30,9 @@ func transactions(w http.ResponseWriter, r *http.Request) {
 	println(string(b))
 
 	// unmarshel json and parse senz
-	var senzMsg SenzMsg
-	json.Unmarshal(b, &senzMsg)
-	senz := parse(senzMsg.Msg)
+	var zmsg Zmsg
+	json.Unmarshal(b, &zmsg)
+	senz := parse(zmsg.Msg)
 
 	// get senzie key
 	user, err := getUser(senz.Sender)
@@ -75,11 +75,11 @@ func transactions(w http.ResponseWriter, r *http.Request) {
 
 func senzResponse(w http.ResponseWriter, status string, uid string, to string) {
 	// marshel and return error
-	zmsg := SenzMsg{
+	zmsg := Zmsg{
 		Uid: uid,
 		Msg: statusSenz("ERROR", uid, to),
 	}
-	var zmsgs []SenzMsg
+	var zmsgs []Zmsg
 	zmsgs = append(zmsgs, zmsg)
 	j, _ := json.Marshal(zmsgs)
 	http.Error(w, string(j), 400)

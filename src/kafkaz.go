@@ -13,6 +13,19 @@ func initKafkaz() {
 	//setup sarama log to stdout
 	sarama.Logger = log.New(os.Stdout, "", log.Ltime)
 
+	// channel to publish kafka messages
+	kchan := make(chan Kmsg)
+
+	// consuner
+	cg := initConzumer()
+	go conzume(cg, kchan)
+
+	// producer
+	pr := initProduzer()
+	go produze(pr, kchan)
+}
+
+func initConzumer() *consumergroup.ConsumerGroup {
 	// consumer config
 	config := consumergroup.NewConfig()
 	config.Offsets.Initial = sarama.OffsetOldest
@@ -26,11 +39,28 @@ func initKafkaz() {
 		os.Exit(1)
 	}
 
-	// run consumer
-	consume(cg)
+	return cg
 }
 
-func consume(cg *consumergroup.ConsumerGroup) {
+func initProduzer() sarama.SyncProducer {
+	// producer config
+	config := sarama.NewConfig()
+	config.Producer.Retry.Max = 5
+	config.Producer.RequiredAcks = sarama.WaitForAll
+	config.Producer.Return.Successes = true
+
+	// sync producer
+	kafkaConn := kafkaConfig.khost + ":" + kafkaConfig.kport
+	pr, err := sarama.NewSyncProducer([]string{kafkaConn}, config)
+	if err != nil {
+		fmt.Println("Error consumer group: ", err.Error())
+		os.Exit(1)
+	}
+
+	return pr
+}
+
+func conzume(cg *consumergroup.ConsumerGroup, kchan chan Kmsg) {
 	for {
 		select {
 		case msg := <-cg.Messages():
@@ -51,6 +81,25 @@ func consume(cg *consumergroup.ConsumerGroup) {
 			}
 
 			// TODO start goroutene to handle the senz message
+		}
+	}
+}
+
+func produze(pr sarama.SyncProducer, kchan chan Kmsg) {
+	for {
+		select {
+		case kmsg := <-kchan:
+			// received kafka message to send
+			// publish sync
+			msg := &sarama.ProducerMessage{
+				Topic: kmsg.Topic,
+				Value: sarama.StringEncoder(kmsg.Msg),
+			}
+			p, o, err := pr.SendMessage(msg)
+			if err != nil {
+				fmt.Println("Error publish: ", err.Error())
+			}
+			fmt.Println("Published msg, partition, offset: ", kmsg.Msg, p, o)
 		}
 	}
 }
