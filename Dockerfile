@@ -9,14 +9,17 @@ RUN go get github.com/Shopify/sarama
 RUN go get github.com/wvanbergen/kafka/consumergroup
 
 # env
-ENV SWITCH_NAME senzswitch
-ENV SWITCH_HOST dev.localhost
-ENV SWITCH_PORT 7070
 ENV SENZIE_NAME sampath
 ENV SENZIE_MODE DEV
 ENV CASSANDRA_HOST dev.localhost
 ENV CASSANDRA_PORT 9042
 ENV CASSANDRA_KEYSPACE zchain
+ENV KAFKA_TOPIC sampath
+ENV KAFKA_CGROUP sampathg
+ENV KAFKA_KHOST dev.localhost
+ENV KAFKA_KPORT 9092
+ENV KAFKA_ZHOST dev.localhost
+ENV KAFKA_KPORT 2181
 
 # copy app
 ADD . /app

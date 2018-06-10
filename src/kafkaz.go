@@ -72,7 +72,9 @@ func conzume(cg *consumergroup.ConsumerGroup) {
 			if msg.Topic != kafkaConfig.topic {
 				continue
 			}
-			fmt.Println("Received topic, msg: ", msg.Topic, msg.Value)
+
+			z := string(msg.Value)
+			fmt.Println("Received topic, msg: ", msg.Topic, z)
 
 			// commit to zookeeper that message is read
 			// this prevent read message multiple times after restart
@@ -82,6 +84,11 @@ func conzume(cg *consumergroup.ConsumerGroup) {
 			}
 
 			// TODO start goroutene to handle the senz message
+			kmsg := Kmsg{
+				Topic: "order",
+				Msg:   z,
+			}
+			kchan <- kmsg
 		}
 	}
 }
