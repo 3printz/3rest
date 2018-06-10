@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func initConsumer() {
+func initKafkaz() {
 	//setup sarama log to stdout
 	sarama.Logger = log.New(os.Stdout, "", log.Ltime)
 
@@ -22,7 +22,7 @@ func initConsumer() {
 	zookeeperConn := kafkaConfig.zhost + ":" + kafkaConfig.zport
 	cg, err := consumergroup.JoinConsumerGroup(kafkaConfig.cgroup, []string{kafkaConfig.topic}, []string{zookeeperConn}, config)
 	if err != nil {
-		fmt.Println("Error consumer goup: ", err.Error())
+		fmt.Println("Error consumer group: ", err.Error())
 		os.Exit(1)
 	}
 
