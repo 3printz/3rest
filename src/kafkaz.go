@@ -83,12 +83,8 @@ func conzume(cg *consumergroup.ConsumerGroup) {
 				fmt.Println("Error commit zookeeper: ", err.Error())
 			}
 
-			// TODO start goroutene to handle the senz message
-			kmsg := Kmsg{
-				Topic: "order",
-				Msg:   z,
-			}
-			kchan <- kmsg
+			// send message to corresponding channel in rchan
+			rchans[z.Attr["uid"]] <- z
 		}
 	}
 }

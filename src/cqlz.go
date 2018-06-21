@@ -266,6 +266,10 @@ func uuid() gocql.UUID {
 	return gocql.TimeUUID()
 }
 
+func uuidstr() string {
+	return gocql.TimeUUID().String()
+}
+
 func cuuid(cid string) (gocql.UUID, error) {
 	return gocql.ParseUUID(cid)
 }

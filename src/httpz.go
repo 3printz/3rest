@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+var rchans = make(map[string](chan string))
+
 func initHttpz() {
 	// router
 	r := mux.NewRouter()
@@ -55,22 +57,35 @@ func transactions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// check for double spend first
-	if isDoubleSpend(senz.Sender, senz.Attr["id"]) {
-		// double spend response
-		senzResponse(w, "DOUBLE_SPEND", senz.Attr["uid"], senz.Sender)
-		return
+	// create channel and add to rchans with senz uuid
+	rchan := make(chan string)
+	uid := senz.Attr["uid"]
+	rchans[senz.Attr["uid"]] = rchan
+
+	// send to orderz(publish message to orderz topic)
+	kmsg := Kmsg{
+		Topic: "orderz",
+		Msg:   zmsg.Msg,
 	}
+	kchan <- kmsg
 
-	// and new trans
-	trans := senzToTrans(&senz)
-	createTrans(trans)
+	// wait for response in for
+	waitForResponse(w, r, rchan, uid)
+}
 
-	// TODO handle create failures
+func waitForResponse(w http.ResponseWriter, r *http.Request, rchan chan string, uid string) {
+	for {
+		select {
+		case resp := <-rchan:
+			// TODO send senzResponse back
+			println(resp)
 
-	// success response
-	senzResponse(w, "SUCCESS", senz.Attr["uid"], senz.Sender)
-	return
+			// clear map
+			delete(rchans, uid)
+
+			return
+		}
+	}
 }
 
 func senzResponse(w http.ResponseWriter, status string, uid string, to string) {
