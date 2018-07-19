@@ -3,10 +3,11 @@ package main
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
-	"strings"
+	//"strings"
 )
 
 var rchans = make(map[string](chan string))
@@ -37,34 +38,34 @@ func transactions(w http.ResponseWriter, r *http.Request) {
 	senz := parse(zmsg.Msg)
 
 	// get senzie key
-	user, err := getUser(senz.Sender)
-	if err != nil {
-		senzResponse(w, "ERROR", senz.Attr["uid"], senz.Sender)
-		return
-	}
+	//user, err := getUser(senz.Sender)
+	//if err != nil {
+	//	senzResponse(w, "ERROR", senz.Attr["uid"], senz.Sender)
+	//	return
+	//}
 
 	// user needs to be active
-	if !user.Active {
-		senzResponse(w, "ERROR", senz.Attr["uid"], senz.Sender)
-		return
-	}
+	//if !user.Active {
+	//	senzResponse(w, "ERROR", senz.Attr["uid"], senz.Sender)
+	//	return
+	//}
 
 	// verify signature
-	payload := strings.Replace(senz.Msg, senz.Digsig, "", -1)
-	err = verify(payload, senz.Digsig, getSenzieRsaPub(user.PublicKey))
-	if err != nil {
-		senzResponse(w, "ERROR", senz.Attr["uid"], senz.Sender)
-		return
-	}
+	//payload := strings.Replace(senz.Msg, senz.Digsig, "", -1)
+	//err = verify(payload, senz.Digsig, getSenzieRsaPub(user.PublicKey))
+	//if err != nil {
+	//		senzResponse(w, "ERROR", senz.Attr["uid"], senz.Sender)
+	//		return
+	//}
 
 	// create channel and add to rchans with senz uuid
 	rchan := make(chan string)
 	uid := senz.Attr["uid"]
-	rchans[senz.Attr["uid"]] = rchan
+	rchans[uid] = rchan
 
 	// send to orderz(publish message to orderz topic)
 	kmsg := Kmsg{
-		Topic: "orderz",
+		Topic: "orderzreq",
 		Msg:   zmsg.Msg,
 	}
 	kchan <- kmsg
@@ -78,7 +79,11 @@ func waitForResponse(w http.ResponseWriter, r *http.Request, rchan chan string, 
 		select {
 		case resp := <-rchan:
 			// TODO send senzResponse back
+			println("wait reponse ---- ")
 			println(resp)
+
+			// senz respone
+			senzResponse(w, resp)
 
 			// clear map
 			delete(rchans, uid)
@@ -88,14 +93,14 @@ func waitForResponse(w http.ResponseWriter, r *http.Request, rchan chan string, 
 	}
 }
 
-func senzResponse(w http.ResponseWriter, status string, uid string, to string) {
-	// marshel and return error
+func senzResponse(w http.ResponseWriter, resp string) {
 	zmsg := Zmsg{
-		Uid: uid,
-		Msg: statusSenz("ERROR", uid, to),
+		Uid: "3223323",
+		Msg: resp,
 	}
-	var zmsgs []Zmsg
-	zmsgs = append(zmsgs, zmsg)
-	j, _ := json.Marshal(zmsgs)
-	http.Error(w, string(j), 400)
+	j, _ := json.Marshal(zmsg)
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	io.WriteString(w, string(j))
 }

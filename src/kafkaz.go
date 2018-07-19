@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/Shopify/sarama"
 	"github.com/wvanbergen/kafka/consumergroup"
-	"log"
+	//"log"
 	"os"
 	"time"
 )
@@ -14,7 +14,7 @@ var kchan = make(chan Kmsg, 10)
 
 func initKafkaz() {
 	//setup sarama log to stdout
-	sarama.Logger = log.New(os.Stdout, "", log.Ltime)
+	//sarama.Logger = log.New(os.Stdout, "", log.Ltime)
 
 	// consuner
 	cg := initConzumer()
@@ -33,8 +33,8 @@ func initConzumer() *consumergroup.ConsumerGroup {
 
 	// join to consumer group
 	zookeeperConn := kafkaConfig.zhost + ":" + kafkaConfig.zport
-	cg, err := consumergroup.JoinConsumerGroup(kafkaConfig.cgroup,
-		[]string{kafkaConfig.topic},
+	cg, err := consumergroup.JoinConsumerGroup("restzg",
+		[]string{"restz"},
 		[]string{zookeeperConn},
 		config)
 	if err != nil {
@@ -69,11 +69,13 @@ func conzume(cg *consumergroup.ConsumerGroup) {
 		case msg := <-cg.Messages():
 			// messages coming through chanel
 			// only take messages from subscribed topic
-			if msg.Topic != kafkaConfig.topic {
+			if msg.Topic != "restz" {
+				println("s----- " + msg.Topic)
 				continue
 			}
 
 			z := string(msg.Value)
+			//senz := parse(z)
 			fmt.Println("Received topic, msg: ", msg.Topic, z)
 
 			// commit to zookeeper that message is read
@@ -84,7 +86,7 @@ func conzume(cg *consumergroup.ConsumerGroup) {
 			}
 
 			// send message to corresponding channel in rchan
-			rchans[z.Attr["uid"]] <- z
+			//rchans[senz.Attr["uid"]] <- z
 		}
 	}
 }
@@ -103,7 +105,7 @@ func produze(pr sarama.SyncProducer) {
 			if err != nil {
 				fmt.Println("Error publish: ", err.Error())
 			}
-			fmt.Println("Published msg, partition, offset: ", kmsg.Msg, p, o)
+			fmt.Println("Published msg, partition, offset, topic: ", kmsg.Msg, p, o, kmsg.Topic)
 		}
 	}
 }
