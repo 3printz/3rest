@@ -74,53 +74,22 @@ func timestamp() int64 {
 	return time.Now().UnixNano() / int64(time.Millisecond)
 }
 
-func senzToTrans(senz *Senz) *Trans {
-	trans := &Trans{}
-	trans.Bank = config.senzieName
-	trans.Id = uuid()
-	trans.Timestamp = timestamp()
-	trans.FromZaddress = senz.Sender
-	trans.ToZaddress = senz.Attr["to"]
-	trans.Digsig = senz.Digsig
-
-	return trans
-}
-
-func senzToUser(senz *Senz) *User {
-	user := &User{}
-	user.Zaddress = senz.Sender
-	user.Bank = config.senzieName
-	user.PublicKey = senz.Attr["pubkey"]
-	user.Verified = false
-	user.Active = true
-	user.Timestamp = timestamp()
-
-	return user
-}
-
-func regSenz() string {
-	z := "SHARE #pubkey " + getIdRsaPubStr() +
-		" #uid " + uid() +
-		" @" + config.switchName +
-		" ^" + config.senzieName
-	s, _ := sign(z, getIdRsa())
-
-	return z + " " + s
-}
-
-func awaSenz(uid string) string {
-	z := "AWA #uid " + uid +
-		" @" + config.switchName +
-		" ^" + config.senzieName
-	s, _ := sign(z, getIdRsa())
-
-	return z + " " + s
-}
-
 func statusSenz(status string, uid string, to string) string {
 	z := "DATA #status " + status +
 		" #uid " + uid +
 		" @" + to +
+		" ^" + config.senzieName
+	s, _ := sign(z, getIdRsa())
+
+	return z + " " + s
+}
+
+func kafkaSenz(zreq Zreq) string {
+	z := "DATA #itemno " + zreq.ItemNo +
+		" #uid " + zreq.Uid +
+		" #quantity " + strconv.Itoa(zreq.Quantity) +
+		" #date " + zreq.DeliveryDate +
+		" @" + "*" +
 		" ^" + config.senzieName
 	s, _ := sign(z, getIdRsa())
 

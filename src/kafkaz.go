@@ -9,6 +9,11 @@ import (
 	"time"
 )
 
+type Kmsg struct {
+	Topic string
+	Msg   string
+}
+
 // channel to publish kafka messages
 var kchan = make(chan Kmsg, 10)
 

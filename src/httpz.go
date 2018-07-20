@@ -9,6 +9,18 @@ import (
 	"os"
 )
 
+type Zreq struct {
+	Uid          string
+	ItemNo       string
+	Quantity     int
+	DeliveryDate string
+}
+
+type Zresp struct {
+	Uid    string
+	Status string
+}
+
 var rchans = make(map[string](chan string))
 
 func initHttpz() {
@@ -31,50 +43,32 @@ func transactions(w http.ResponseWriter, r *http.Request) {
 
 	println(string(b))
 
-	// unmarshel json and parse senz
-	var zmsg Zmsg
-	json.Unmarshal(b, &zmsg)
-	senz := parse(zmsg.Msg)
+	// unmarshel json
+	var zreq Zreq
+	json.Unmarshal(b, &zreq)
+	senz := kafkaSenz(zreq)
 
-	// create channel and add to rchans with senz uuid
+	// create channel and add to rchans with uuid
 	rchan := make(chan string)
-	uid := senz.Attr["uid"]
+	uid := zreq.Uid
 	rchans[uid] = rchan
 
 	// send to orderz(publish message to orderz topic)
 	kmsg := Kmsg{
 		Topic: "opsreq",
-		Msg:   zmsg.Msg,
+		Msg:   senz,
 	}
 	kchan <- kmsg
 
 	senzResponse(w, "DONE")
 }
 
-func waitForResponse(w http.ResponseWriter, r *http.Request, rchan chan string, uid string) {
-	for {
-		select {
-		case resp := <-rchan:
-			// send senzResponse back
-			println(resp)
-
-			// senz respone
-			senzResponse(w, resp)
-
-			// clear map
-			delete(rchans, uid)
-
-			return
-		}
+func senzResponse(w http.ResponseWriter, status string) {
+	zresp := Zresp{
+		Uid:    "3223323",
+		Status: status,
 	}
-}
-
-func senzResponse(w http.ResponseWriter, resp string) {
-	zmsg := Zmsg{
-		Uid: "3223323",
-		Msg: resp,
-	}
-	j, _ := json.Marshal(zmsg)
+	j, _ := json.Marshal(zresp)
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")

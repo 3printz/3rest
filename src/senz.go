@@ -10,16 +10,6 @@ type Senz struct {
 	Digsig   string
 }
 
-type Zmsg struct {
-	Uid string
-	Msg string
-}
-
-type Kmsg struct {
-	Topic string
-	Msg   string
-}
-
 func main() {
 	// first init key pair
 	setUpKeys()
