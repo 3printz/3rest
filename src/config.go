@@ -50,8 +50,8 @@ var cassandraConfig = CassandraConfig{
 }
 
 var kafkaConfig = KafkaConfig{
-	topic:  getEnv("KAFKA_TOPIC", "restz"),
-	cgroup: getEnv("KAFKA_CGROUP", "restzg"),
+	topic:  getEnv("KAFKA_TOPIC", "rest"),
+	cgroup: getEnv("KAFKA_CGROUP", "restg"),
 	khost:  getEnv("KAFKA_KHOST", "dev.localhost"),
 	kport:  getEnv("KAFKA_KPORT", "9092"),
 	zhost:  getEnv("KAFKA_ZHOST", "dev.localhost"),

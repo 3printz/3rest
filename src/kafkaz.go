@@ -33,8 +33,8 @@ func initConzumer() *consumergroup.ConsumerGroup {
 
 	// join to consumer group
 	zookeeperConn := kafkaConfig.zhost + ":" + kafkaConfig.zport
-	cg, err := consumergroup.JoinConsumerGroup("restzg",
-		[]string{"restz"},
+	cg, err := consumergroup.JoinConsumerGroup("restg",
+		[]string{"rest"},
 		[]string{zookeeperConn},
 		config)
 	if err != nil {
@@ -69,8 +69,7 @@ func conzume(cg *consumergroup.ConsumerGroup) {
 		case msg := <-cg.Messages():
 			// messages coming through chanel
 			// only take messages from subscribed topic
-			if msg.Topic != "restz" {
-				println("s----- " + msg.Topic)
+			if msg.Topic != "rest" {
 				continue
 			}
 

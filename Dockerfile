@@ -7,6 +7,7 @@ RUN go get github.com/gocql/gocql
 RUN	go get github.com/gorilla/mux
 RUN go get github.com/Shopify/sarama
 RUN go get github.com/wvanbergen/kafka/consumergroup
+RUN go get github.com/gorilla/handlers
 
 # env
 ENV SENZIE_NAME restz

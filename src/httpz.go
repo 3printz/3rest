@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	//"strings"
 )
 
 var rchans = make(map[string](chan string))
@@ -37,27 +36,6 @@ func transactions(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(b, &zmsg)
 	senz := parse(zmsg.Msg)
 
-	// get senzie key
-	//user, err := getUser(senz.Sender)
-	//if err != nil {
-	//	senzResponse(w, "ERROR", senz.Attr["uid"], senz.Sender)
-	//	return
-	//}
-
-	// user needs to be active
-	//if !user.Active {
-	//	senzResponse(w, "ERROR", senz.Attr["uid"], senz.Sender)
-	//	return
-	//}
-
-	// verify signature
-	//payload := strings.Replace(senz.Msg, senz.Digsig, "", -1)
-	//err = verify(payload, senz.Digsig, getSenzieRsaPub(user.PublicKey))
-	//if err != nil {
-	//		senzResponse(w, "ERROR", senz.Attr["uid"], senz.Sender)
-	//		return
-	//}
-
 	// create channel and add to rchans with senz uuid
 	rchan := make(chan string)
 	uid := senz.Attr["uid"]
@@ -65,21 +43,19 @@ func transactions(w http.ResponseWriter, r *http.Request) {
 
 	// send to orderz(publish message to orderz topic)
 	kmsg := Kmsg{
-		Topic: "orderzreq",
+		Topic: "opsreq",
 		Msg:   zmsg.Msg,
 	}
 	kchan <- kmsg
 
-	// wait for response in for
-	waitForResponse(w, r, rchan, uid)
+	senzResponse(w, "DONE")
 }
 
 func waitForResponse(w http.ResponseWriter, r *http.Request, rchan chan string, uid string) {
 	for {
 		select {
 		case resp := <-rchan:
-			// TODO send senzResponse back
-			println("wait reponse ---- ")
+			// send senzResponse back
 			println(resp)
 
 			// senz respone
