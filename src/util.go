@@ -84,11 +84,30 @@ func statusSenz(status string, uid string, to string) string {
 	return z + " " + s
 }
 
-func kafkaSenz(zreq Zreq) string {
-	z := "DATA #itemno " + zreq.ItemNo +
-		" #uid " + zreq.Uid +
-		" #quantity " + strconv.Itoa(zreq.Quantity) +
-		" #date " + zreq.DeliveryDate +
+func preqSenz(req Zpreq) string {
+	z := "DATA #itemno " + req.ItemNo +
+		" #type " + "PREQ" +
+		" #uid " + req.Uid +
+		" #customer " + req.CustomerId +
+		" #quantity " + strconv.Itoa(req.ItemQun) +
+		" #date " + req.DeliveryDate +
+		" #location " + req.DeliveryLocation +
+		" #price " + req.ItemPrice +
+		" @" + "*" +
+		" ^" + config.senzieName
+	s, _ := sign(z, getIdRsa())
+
+	return z + " " + s
+}
+
+func pordSenz(req Zporder) string {
+	z := "DATA #itemno " + req.ItemNo +
+		" #type " + "PORD" +
+		" #uid " + req.Uid +
+		" #oemid " + req.OemId +
+		" #amcid " + req.AmcId +
+		" #date " + req.DeliveryDate +
+		" #addr " + req.DeliveryAddress +
 		" @" + "*" +
 		" ^" + config.senzieName
 	s, _ := sign(z, getIdRsa())

@@ -9,11 +9,35 @@ import (
 	"os"
 )
 
-type Zreq struct {
-	Uid          string
-	ItemNo       string
-	Quantity     int
-	DeliveryDate string
+type Zpreq struct {
+	Uid              string
+	PrId             string
+	CustomerId       string
+	CustonerContact  string
+	DeliveryDate     string
+	DeliveryDue      int
+	DeliveryLocation string
+	ItemNo           string
+	ItemQun          int
+	ItemPrice        string
+}
+
+type Zporder struct {
+	Uid             string
+	ItemNo          string
+	OemId           string
+	AmcId           string
+	DeliveryDate    string
+	DeliveryAddress string
+}
+
+type Zprnt struct {
+	Uid             string
+	ItemNo          string
+	OemId           string
+	AmcId           string
+	DeliveryDate    string
+	DeliveryAddress string
 }
 
 type Zresp struct {
@@ -26,7 +50,9 @@ var rchans = make(map[string](chan string))
 func initHttpz() {
 	// router
 	r := mux.NewRouter()
-	r.HandleFunc("/transactions", transactions).Methods("POST")
+	r.HandleFunc("/prcontracts", prcontracts).Methods("POST")
+	r.HandleFunc("/pocontracts", pocontracts).Methods("POST")
+	r.HandleFunc("/pcontracts", pcontracts).Methods("POST")
 
 	// start server
 	err := http.ListenAndServe(":7070", r)
@@ -36,7 +62,7 @@ func initHttpz() {
 	}
 }
 
-func transactions(w http.ResponseWriter, r *http.Request) {
+func prcontracts(w http.ResponseWriter, r *http.Request) {
 	// read body
 	b, _ := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
@@ -44,14 +70,58 @@ func transactions(w http.ResponseWriter, r *http.Request) {
 	println(string(b))
 
 	// unmarshel json
-	var zreq Zreq
-	json.Unmarshal(b, &zreq)
-	senz := kafkaSenz(zreq)
+	var req Zpreq
+	json.Unmarshal(b, &req)
+	senz := preqSenz(req)
 
 	// create channel and add to rchans with uuid
 	rchan := make(chan string)
-	uid := zreq.Uid
+	uid := req.Uid
 	rchans[uid] = rchan
+
+	// send to orderz(publish message to orderz topic)
+	kmsg := Kmsg{
+		Topic: "opsreq",
+		Msg:   senz,
+	}
+	kchan <- kmsg
+
+	senzResponse(w, "DONE")
+}
+
+func pocontracts(w http.ResponseWriter, r *http.Request) {
+	// read body
+	b, _ := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	println(string(b))
+
+	// unmarshel json
+	var req Zporder
+	json.Unmarshal(b, &req)
+	senz := pordSenz(req)
+
+	// send to orderz(publish message to orderz topic)
+	kmsg := Kmsg{
+		Topic: "opsreq",
+		Msg:   senz,
+	}
+	kchan <- kmsg
+
+	senzResponse(w, "DONE")
+}
+
+func pcontracts(w http.ResponseWriter, r *http.Request) {
+	// read body
+	b, _ := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	println(string(b))
+
+	// unmarshel json
+	var req Zporder
+	json.Unmarshal(b, &req)
+	senz := pordSenz(req)
 
 	// send to orderz(publish message to orderz topic)
 	kmsg := Kmsg{
