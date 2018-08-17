@@ -88,6 +88,7 @@ func preqSenz(req Zpreq) string {
 	z := "DATA #itemno " + req.ItemNo +
 		" #type " + "PREQ" +
 		" #uid " + req.Uid +
+		" #prid " + req.PrId +
 		" #customer " + req.CustomerId +
 		" #quantity " + strconv.Itoa(req.ItemQun) +
 		" #date " + req.DeliveryDate +

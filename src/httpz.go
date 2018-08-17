@@ -13,7 +13,7 @@ type Zpreq struct {
 	Uid              string
 	PrId             string
 	CustomerId       string
-	CustonerContact  string
+	CustomerContact  string
 	DeliveryDate     string
 	DeliveryDue      int
 	DeliveryLocation string
