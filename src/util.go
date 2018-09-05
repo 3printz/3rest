@@ -102,13 +102,26 @@ func preqSenz(req Zpreq) string {
 }
 
 func pordSenz(req Zporder) string {
-	z := "DATA #itemno " + req.ItemNo +
-		" #type " + "PORD" +
+	z := "DATA #type " + "PORD" +
 		" #uid " + req.Uid +
+		" #poid " + req.PoId +
 		" #oemid " + req.OemId +
 		" #amcid " + req.AmcId +
-		" #date " + req.DeliveryDate +
-		" #addr " + req.DeliveryAddress +
+		" #oemapi " + req.OemApi +
+		" #amcapi " + req.AmcApi +
+		" @" + "*" +
+		" ^" + config.senzieName
+	s, _ := sign(z, getIdRsa())
+
+	return z + " " + s
+}
+
+func dprepSenz(req Zdprep) string {
+	z := "DATA #type " + "DPREP" +
+		" #uid " + req.Uid +
+		" #poid " + req.PoId +
+		" #amcid " + req.AmcId +
+		" #amcapi " + req.AmcApi +
 		" @" + "*" +
 		" ^" + config.senzieName
 	s, _ := sign(z, getIdRsa())

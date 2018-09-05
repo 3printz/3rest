@@ -23,12 +23,22 @@ type Zpreq struct {
 }
 
 type Zporder struct {
-	Uid             string
-	ItemNo          string
-	OemId           string
-	AmcId           string
-	DeliveryDate    string
-	DeliveryAddress string
+	Uid    string
+	PoId   string
+	OemId  string
+	AmcId  string
+	AmcApi string
+	OemApi string
+}
+
+type Zdprep struct {
+	Uid         string
+	PoId        string
+	DataFile    string
+	Instruction string
+	AmcId       string
+	AmcApi      string
+	OemId       string
 }
 
 type Zprnt struct {
@@ -52,6 +62,7 @@ func initHttpz() {
 	r := mux.NewRouter()
 	r.HandleFunc("/prcontracts", prcontracts).Methods("POST")
 	r.HandleFunc("/pocontracts", pocontracts).Methods("POST")
+	r.HandleFunc("/dpcontracts", dpcontracts).Methods("POST")
 	r.HandleFunc("/pcontracts", pcontracts).Methods("POST")
 
 	// start server
@@ -100,6 +111,28 @@ func pocontracts(w http.ResponseWriter, r *http.Request) {
 	var req Zporder
 	json.Unmarshal(b, &req)
 	senz := pordSenz(req)
+
+	// send to orderz(publish message to orderz topic)
+	kmsg := Kmsg{
+		Topic: "opsreq",
+		Msg:   senz,
+	}
+	kchan <- kmsg
+
+	senzResponse(w, "DONE")
+}
+
+func dpcontracts(w http.ResponseWriter, r *http.Request) {
+	// read body
+	b, _ := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	println(string(b))
+
+	// unmarshel json
+	var req Zdprep
+	json.Unmarshal(b, &req)
+	senz := dprepSenz(req)
 
 	// send to orderz(publish message to orderz topic)
 	kmsg := Kmsg{
