@@ -88,6 +88,7 @@ func preqSenz(req Zpreq) string {
 	z := "DATA #itemno " + req.ItemNo +
 		" #type " + "PREQ" +
 		" #uid " + req.Uid +
+		" #cid " + req.Cid +
 		" #prid " + req.PrId +
 		" #customer " + req.CustomerId +
 		" #quantity " + strconv.Itoa(req.ItemQun) +
@@ -104,6 +105,7 @@ func preqSenz(req Zpreq) string {
 func pordSenz(req Zporder) string {
 	z := "DATA #type " + "PORD" +
 		" #uid " + req.Uid +
+		" #cid " + req.Cid +
 		" #poid " + req.PoId +
 		" #oemid " + req.OemId +
 		" #amcid " + req.AmcId +
@@ -119,6 +121,7 @@ func pordSenz(req Zporder) string {
 func dprepSenz(req Zdprep) string {
 	z := "DATA #type " + "DPREP" +
 		" #uid " + req.Uid +
+		" #cid " + req.Cid +
 		" #poid " + req.PoId +
 		" #amcid " + req.AmcId +
 		" #amcapi " + req.AmcApi +

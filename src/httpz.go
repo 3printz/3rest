@@ -11,6 +11,7 @@ import (
 
 type Zpreq struct {
 	Uid              string
+	Cid              string
 	PrId             string
 	CustomerId       string
 	CustomerContact  string
@@ -24,6 +25,7 @@ type Zpreq struct {
 
 type Zporder struct {
 	Uid    string
+	Cid    string
 	PoId   string
 	OemId  string
 	AmcId  string
@@ -33,6 +35,7 @@ type Zporder struct {
 
 type Zdprep struct {
 	Uid         string
+	Cid         string
 	PoId        string
 	DataFile    string
 	Instruction string
