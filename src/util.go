@@ -131,3 +131,50 @@ func dprepSenz(req Zdprep) string {
 
 	return z + " " + s
 }
+
+func delnoteSenz(req Zdelnote) string {
+	z := "DATA #type " + "DELNOTE" +
+		" #uid " + req.Uid +
+		" #cid " + req.Cid +
+		" #createdate " + req.CreatedAt +
+		" #poid " + req.PoId +
+		" #status " + req.Status +
+		" #updatedate " + req.UpdatedAt +
+		" @" + "*" +
+		" ^" + config.senzieName
+	s, _ := sign(z, getIdRsa())
+
+	return z + " " + s
+}
+
+func invoiceSenz(req Zinvoice) string {
+	z := "DATA #type " + "INVOICE" +
+		" #uid " + req.Uid +
+		" #cid " + req.Cid +
+		" #dnid " + req.DnId +
+		" #inid " + req.InId +
+		" #poid " + req.PoId +
+		" #status " + req.Status +
+		" #totalPrice " + req.TotalPrice +
+		" #totalQun " + req.TotalQun +
+		" #customerId " + req.CustomerId +
+		" #callback " + req.Callback +
+		" @" + "*" +
+		" ^" + config.senzieName
+	s, _ := sign(z, getIdRsa())
+
+	return z + " " + s
+}
+
+func prntSenz(req Zprnt) string {
+	z := "DATA #type " + "PRNT" +
+		" #uid " + req.Uid +
+		" #cid " + req.Cid +
+		" #prid " + req.PrId +
+		" #srlno " + req.SerialNumber +
+		" @" + "*" +
+		" ^" + config.senzieName
+	s, _ := sign(z, getIdRsa())
+
+	return z + " " + s
+}

@@ -45,12 +45,32 @@ type Zdprep struct {
 }
 
 type Zprnt struct {
-	Uid             string
-	ItemNo          string
-	OemId           string
-	AmcId           string
-	DeliveryDate    string
-	DeliveryAddress string
+	Uid          string
+	Cid          string
+	SerialNumber string
+	PrId         string
+}
+
+type Zdelnote struct {
+	Uid       string
+	CreatedAt string
+	PoId      string
+	Cid       string
+	Status    string
+	UpdatedAt string
+}
+
+type Zinvoice struct {
+	Uid        string
+	Cid        string
+	DnId       string
+	InId       string
+	PoId       string
+	Status     string
+	TotalPrice string
+	TotalQun   string
+	CustomerId string
+	Callback   string
 }
 
 type Zresp struct {
@@ -67,6 +87,8 @@ func initHttpz() {
 	r.HandleFunc("/pocontracts", pocontracts).Methods("POST")
 	r.HandleFunc("/dpcontracts", dpcontracts).Methods("POST")
 	r.HandleFunc("/pcontracts", pcontracts).Methods("POST")
+	r.HandleFunc("/delnotecontracts", delnotecontracts).Methods("POST")
+	r.HandleFunc("/invoicecontracts", invoicecontracts).Methods("POST")
 
 	// start server
 	err := http.ListenAndServe(":7070", r)
@@ -155,9 +177,53 @@ func pcontracts(w http.ResponseWriter, r *http.Request) {
 	println(string(b))
 
 	// unmarshel json
-	var req Zporder
+	var req Zprnt
 	json.Unmarshal(b, &req)
-	senz := pordSenz(req)
+	senz := prntSenz(req)
+
+	// send to orderz(publish message to orderz topic)
+	kmsg := Kmsg{
+		Topic: "opsreq",
+		Msg:   senz,
+	}
+	kchan <- kmsg
+
+	senzResponse(w, "DONE")
+}
+
+func delnotecontracts(w http.ResponseWriter, r *http.Request) {
+	// read body
+	b, _ := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	println(string(b))
+
+	// unmarshel json
+	var req Zdelnote
+	json.Unmarshal(b, &req)
+	senz := delnoteSenz(req)
+
+	// send to orderz(publish message to orderz topic)
+	kmsg := Kmsg{
+		Topic: "opsreq",
+		Msg:   senz,
+	}
+	kchan <- kmsg
+
+	senzResponse(w, "DONE")
+}
+
+func invoicecontracts(w http.ResponseWriter, r *http.Request) {
+	// read body
+	b, _ := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	println(string(b))
+
+	// unmarshel json
+	var req Zinvoice
+	json.Unmarshal(b, &req)
+	senz := invoiceSenz(req)
 
 	// send to orderz(publish message to orderz topic)
 	kmsg := Kmsg{
