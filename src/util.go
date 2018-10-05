@@ -118,6 +118,19 @@ func pordSenz(req Zporder) string {
 	return z + " " + s
 }
 
+func prntSenz(req Zprnt) string {
+	z := "DATA #type " + "PRNT" +
+		" #uid " + req.Uid +
+		" #cid " + req.Cid +
+		" #prid " + req.PrId +
+		" #srlno " + req.SerialNumber +
+		" @" + "*" +
+		" ^" + config.senzieName
+	s, _ := sign(z, getIdRsa())
+
+	return z + " " + s
+}
+
 func dprepSenz(req Zdprep) string {
 	z := "DATA #type " + "DPREP" +
 		" #uid " + req.Uid +
@@ -166,12 +179,12 @@ func invoiceSenz(req Zinvoice) string {
 	return z + " " + s
 }
 
-func prntSenz(req Zprnt) string {
-	z := "DATA #type " + "PRNT" +
+func ackSenz(req Zack) string {
+	z := "DATA #type " + "ACK" +
 		" #uid " + req.Uid +
 		" #cid " + req.Cid +
-		" #prid " + req.PrId +
-		" #srlno " + req.SerialNumber +
+		" #inid " + req.InId +
+		" #customerId " + req.CustomerId +
 		" @" + "*" +
 		" ^" + config.senzieName
 	s, _ := sign(z, getIdRsa())

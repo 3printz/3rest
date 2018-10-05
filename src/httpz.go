@@ -73,6 +73,14 @@ type Zinvoice struct {
 	Callback   string
 }
 
+type Zack struct {
+	Uid        string
+	Cid        string
+	InId       string
+	Status     string
+	CustomerId string
+}
+
 type Zresp struct {
 	Uid    string
 	Status string
@@ -89,6 +97,7 @@ func initHttpz() {
 	r.HandleFunc("/pcontracts", pcontracts).Methods("POST")
 	r.HandleFunc("/delnotecontracts", delnotecontracts).Methods("POST")
 	r.HandleFunc("/invoicecontracts", invoicecontracts).Methods("POST")
+	r.HandleFunc("/ackcontracts", ackcontracts).Methods("POST")
 
 	// start server
 	err := http.ListenAndServe(":7070", r)
@@ -224,6 +233,28 @@ func invoicecontracts(w http.ResponseWriter, r *http.Request) {
 	var req Zinvoice
 	json.Unmarshal(b, &req)
 	senz := invoiceSenz(req)
+
+	// send to orderz(publish message to orderz topic)
+	kmsg := Kmsg{
+		Topic: "opsreq",
+		Msg:   senz,
+	}
+	kchan <- kmsg
+
+	senzResponse(w, "DONE")
+}
+
+func ackcontracts(w http.ResponseWriter, r *http.Request) {
+	// read body
+	b, _ := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	println(string(b))
+
+	// unmarshel json
+	var req Zack
+	json.Unmarshal(b, &req)
+	senz := ackSenz(req)
 
 	// send to orderz(publish message to orderz topic)
 	kmsg := Kmsg{
