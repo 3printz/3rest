@@ -191,3 +191,19 @@ func ackSenz(req Zack) string {
 
 	return z + " " + s
 }
+
+func paymentSenz(req Zpayment) string {
+	z := "DATA #type " + "PAY" +
+		" #uid " + req.Uid +
+		" #cid " + req.Cid +
+		" #inid " + req.InId +
+		" #price " + req.Price +
+		" #status " + req.Status +
+		" #entityId " + req.EntityId +
+		" #callback " + req.Callback +
+		" @" + "*" +
+		" ^" + config.senzieName
+	s, _ := sign(z, getIdRsa())
+
+	return z + " " + s
+}
